@@ -41,7 +41,7 @@ const app = () => {
         password
       );
       console.log("Signed in:", userCredential.user.email);
-      router.push("/(tabs)/homepage");
+      router.push("/(tabs)/problems");
     } catch (error: any) {
       console.error("Sign-in error:", error.code, error.message);
       Alert.alert("Sign-in Failed", error.message);
