@@ -24,7 +24,7 @@ const registration = () => {
 
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       console.log("Registered:", userCredential.user.email);
-      router.push("/(tabs)/problems");
+      router.push("/(tabs)/home");
     } catch (error : any) {
       console.error("Sign-up error:", error.code, error.message);
       Alert.alert("Sign-up Failed", error.message);

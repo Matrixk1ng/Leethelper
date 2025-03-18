@@ -22,11 +22,13 @@ const app = () => {
   const [password, setPassword] = useState("");
   const router = useRouter();
 
+  // use effect to monitor the state of the user if they are signin or not.
   useEffect(() => {
-    console.log("App starting, using Firebase JS SDK");
     const unsubscribe = onAuthStateChanged(auth, (userState) => {
-      console.log("Auth state:", userState ? userState.email : "No user");
-      setUser(userState); // Now TypeScript knows userState is User | null
+      setUser(userState); 
+      if(userState){
+        router.push("/(tabs)/home");
+      }
       setLoading(false);
     });
     return unsubscribe;
@@ -91,11 +93,6 @@ const app = () => {
     );
   }
 
-  return (
-    <View>
-      <Text>Welcome {user.email}</Text>
-    </View>
-  );
 };
 
 export default app;
