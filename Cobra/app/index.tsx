@@ -14,7 +14,6 @@ import {
   onAuthStateChanged,
   User,
 } from "firebase/auth";
-
 const app = () => {
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<User | null>(null);
@@ -43,7 +42,7 @@ const app = () => {
         password
       );
       console.log("Signed in:", userCredential.user.email);
-      router.push("/(tabs)/problems");
+      router.push("/(tabs)/home");
     } catch (error: any) {
       console.error("Sign-in error:", error.code, error.message);
       Alert.alert("Sign-in Failed", error.message);

@@ -1,15 +1,35 @@
-import { View, Text, StyleSheet, Pressable, FlatList } from "react-native";
-import React, { useState } from "react";
+import { Text, StyleSheet, Pressable, View, TouchableOpacity, FlatList, ActivityIndicator } from "react-native";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "expo-router";
 import { signOut } from "firebase/auth";
 import { auth } from "@/firebaseConfig";
-
-
-
+import { fetchNews } from "@/api/newsAPI";
+import { Article } from "@/types/newstypes";
 
 const HomePage = () => {
   const router = useRouter();
+  const [articles, setArticles] = useState<Article[]>([]);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    const loadNews = async () => {
+      try {
+        const news = await fetchNews();
+        // Assign unique numeric IDs
+        const newsWithIds = news.map((article, index) => ({
+          ...article,
+          id: index + 1, // Starting from 1
+        }));
 
+        setArticles(newsWithIds);
+      } catch (error) {
+        console.error("Error loading news:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadNews();
+  }, []);
   const handleSignOut = async () => {
     try {
       console.log("Signing out...");
@@ -21,16 +41,41 @@ const HomePage = () => {
     }
   };
 
-
-
+  if (loading) {
+    return <ActivityIndicator size="large" color="#6d28d9" />;
+  }
   return (
     <View style={styles.container}>
-      
-      <Pressable style={styles.button}>
-        <Text style={styles.buttonText} onPress={handleSignOut}>
-          Sign out
-        </Text>
-      </Pressable>
+      {/* Header */}
+      <Text style={styles.title}>IntellectInk</Text>
+      <Text style={styles.subtitle}>Explore bite-sized insights and stay curious.</Text>
+
+      {/* Reading Tracker */}
+      <TouchableOpacity style={styles.tracker}>
+        <Text style={styles.trackerDays}>2 days</Text>
+        <Text style={styles.trackerLabel}>Reading tracker</Text>
+      </TouchableOpacity>
+
+      {/* Content List */}
+      <FlatList
+        data={articles}
+        keyExtractor={(item) => item.id?.toString() || item.url} 
+        renderItem={({ item }) => (
+          <View style={styles.section}>
+            {/* <Text style={styles.sectionTitle}>{item.source.name}</Text> */}
+            <View style={styles.articleCard}>
+              <Text style={styles.articleTitle}>{item.title}</Text>
+              <Text style={styles.articleExcerpt}>{item.description}</Text>
+              <Text style={styles.articleMeta}>
+              {item.source.name} • {new Date(item.publishedAt).toDateString()}
+              </Text>
+            </View>
+          </View>
+        )}
+      />
+      <Pressable style={styles.button} onPress={handleSignOut}>
+            <Text style={styles.buttonText}>Sign out</Text>
+          </Pressable>
     </View>
   );
 };
@@ -41,11 +86,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "black",
-  },
-  text: {
-    color: "white",
-    fontSize: 24,
-    fontWeight: "bold",
+    paddingHorizontal: 16,
+    paddingTop: 40,
   },
   buttonText: {
     color: "white",
@@ -59,13 +101,59 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     padding: 6,
   },
-  title: { color: "white", fontSize: 18, fontWeight: "bold" },
-  item: { padding: 15, borderBottomWidth: 1, borderBottomColor: "gray" },
-  difficulty: { color: "#888", fontSize: 14 },
-  header: {
-    color: "white",
-    fontSize: 28,
+  title: {
+    fontSize: 24,
     fontWeight: "bold",
+    color: "white",
+  },
+  subtitle: {
+    fontSize: 14,
+    color: "#6b7280",
+    marginBottom: 16,
+  },
+  tracker: {
+    backgroundColor: "#6d28d9",
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 12,
     marginBottom: 20,
+  },
+  trackerDays: {
+    color: "#fff",
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+  trackerLabel: {
+    color: "#fff",
+    fontSize: 12,
+  },
+  section: {
+    marginBottom: 16,
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "white",
+    marginBottom: 8,
+  },
+  articleCard: {
+    backgroundColor: "black",
+    padding: 12,
+    borderRadius: 8,
+  },
+  articleTitle: {
+    fontSize: 14,
+    fontWeight: "bold",
+    color: "white",
+  },
+  articleExcerpt: {
+    fontSize: 12,
+    color: "white",
+    marginTop: 4,
+  },
+  articleMeta: {
+    fontSize: 10,
+    color: "#9ca3af",
+    marginTop: 6,
   },
 });

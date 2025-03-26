@@ -3,7 +3,9 @@ import FontAwesome from "@expo/vector-icons/FontAwesome";
 
 export default function TabsLayout() {
   return (
-    <Tabs>
+    <Tabs screenOptions={{
+      headerShown: false, // Hide header for all screens
+    }}>
       <Tabs.Screen
         name="home"
         options={{
