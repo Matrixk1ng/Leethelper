@@ -1,21 +1,246 @@
-import { View, Text } from "react-native"
+import React, { useEffect, useState } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Modal,
+  Alert,
+  Pressable,
+  SafeAreaView,
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { auth } from "../../firebaseConfig"; // adjust the path based on your structure
+import { User } from "firebase/auth";
+
+
+const allTopics = [
+  "Technology",
+  "Science",
+  "History",
+  "Literature",
+  "Poetry",
+  "Health",
+];
 
 const profile = () => {
-    return (
-        <View style={styles.container}>
-            <Text style={styles.text}>Profile</Text>
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedTopics, setSelectedTopics] = useState<string[]>([]);
+  
+  const toggleTopic = (topic: string) => {
+    setSelectedTopics(
+      (prev) =>
+        prev.includes(topic)
+          ? prev.filter((t) => t !== topic) // deselect
+          : [...prev, topic] // select
+    );
+  };
+
+  const [user, setUser] = useState<User | null>(null);
+  useEffect(() => {
+    const currentUser = auth.currentUser;
+    setUser(currentUser);
+  }, []);
+  return (
+    <View style={styles.container}>
+      <TouchableOpacity style={styles.backButton}>
+        <Ionicons name="chevron-back" size={24} color="black" />
+      </TouchableOpacity>
+
+      <View style={styles.avatarContainer}>
+        <Ionicons name="person-circle-outline" size={100} color="#999" />
+      </View>
+      {user ? (
+        <>
+          <Text style={styles.name}>{user.displayName || "No Name"}</Text>
+          <Text style={styles.email}>{user.email}</Text>
+        </>
+      ) : (
+        <Text style={styles.email}>Loading user info...</Text>
+      )}
+
+      {/* Placeholder for topics */}
+      <Text style={styles.sectionTitle}>Topics of Interest</Text>
+      <View style={styles.topicContainer}>
+        <View style={styles.topicChip}>
+          <Text style={styles.topicText}>Technology</Text>
         </View>
-    )
-}
+        <View style={styles.topicChip}>
+          <Text style={styles.topicText}>Science</Text>
+        </View>
+      </View>
 
+      <TouchableOpacity
+        style={styles.updateButton}
+        onPress={() => setModalVisible(true)}
+      >
+        <Text style={styles.updateButtonText}>Update Preferences</Text>
+      </TouchableOpacity>
+
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => {
+          Alert.alert("Modal has been closed.");
+          setModalVisible(!modalVisible);
+        }}
+      >
+        <View style={styles.centeredView}>
+          <View style={styles.modalView}>
+            <Text style={styles.modalText}>Select your topics</Text>
+            <View style={styles.topicList}>
+              {allTopics.map((topic, index) => {
+                const isSelected = selectedTopics.includes(topic);
+                return (
+                  <TouchableOpacity
+                    key={index}
+                    style={[
+                      styles.topicChip,
+                      isSelected && styles.topicChipSelected,
+                    ]}
+                    onPress={() => toggleTopic(topic)}
+                  >
+                    <Text
+                      style={[
+                        styles.topicText,
+                        isSelected && styles.topicTextSelected,
+                      ]}
+                    >
+                      {topic}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+            <Pressable
+              style={[styles.button, styles.buttonClose]}
+              onPress={() => setModalVisible(!modalVisible)}
+            >
+              <Text style={styles.textStyle}>Hide Modal</Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
+    </View>
+  );
+};
 export default profile;
-
-const styles = {
-    container: {
-        flex: 1,
-        backgroundColor: "black",
-      },
-    text: {
-        color: "white"
-    }
-}
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#fff",
+    paddingHorizontal: 20,
+    paddingTop: 60,
+    alignItems: "center",
+  },
+  topicList: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "center",
+    marginTop: 10,
+  },
+  topicChip: {
+    backgroundColor: "#f3f4f6",
+    borderRadius: 16,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    margin: 6,
+  },
+  topicChipSelected: {
+    backgroundColor: "#6d28d9",
+  },
+  topicText: {
+    fontSize: 14,
+    color: "#333",
+  },
+  topicTextSelected: {
+    color: "#fff",
+    fontWeight: "bold",
+  },
+  centeredView: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.4)", // dimmed background
+  },
+  buttonClose: {
+    backgroundColor: "#2196F3",
+  },
+  textStyle: {
+    color: "white",
+    fontWeight: "bold",
+    textAlign: "center",
+  },
+  button: {
+    borderRadius: 20,
+    padding: 10,
+    elevation: 2,
+  },
+  modalText: {
+    marginBottom: 15,
+    textAlign: "center",
+  },
+  modalView: {
+    width: "90%",
+    backgroundColor: "white",
+    borderRadius: 20,
+    paddingVertical: 40,
+    paddingHorizontal: 20,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 6,
+  },
+  backButton: {
+    position: "absolute",
+    top: 50,
+    left: 20,
+  },
+  avatarContainer: {
+    marginBottom: 10,
+  },
+  name: {
+    fontSize: 22,
+    fontWeight: "bold",
+    color: "#000",
+  },
+  email: {
+    fontSize: 14,
+    color: "#666",
+    marginBottom: 20,
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#000",
+    marginTop: 20,
+    alignSelf: "flex-start",
+  },
+  topicContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+    marginTop: 10,
+    alignSelf: "flex-start",
+  },
+  updateButton: {
+    backgroundColor: "#6d28d9",
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 12,
+    marginTop: 40,
+    width: "100%",
+    alignItems: "center",
+  },
+  updateButtonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+});

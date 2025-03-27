@@ -1,4 +1,14 @@
-import { Text, StyleSheet, Pressable, View, TouchableOpacity, FlatList, ActivityIndicator } from "react-native";
+import {
+  Text,
+  StyleSheet,
+  Pressable,
+  View,
+  TouchableOpacity,
+  FlatList,
+  ActivityIndicator,
+  Image,
+  Linking,
+} from "react-native";
 import React, { useEffect, useState } from "react";
 import { useRouter } from "expo-router";
 import { signOut } from "firebase/auth";
@@ -14,13 +24,10 @@ const HomePage = () => {
     const loadNews = async () => {
       try {
         const news = await fetchNews();
-        // Assign unique numeric IDs
-        const newsWithIds = news.map((article, index) => ({
-          ...article,
-          id: index + 1, // Starting from 1
-        }));
-
-        setArticles(newsWithIds);
+        if (news === undefined) {
+          return new Error("Undefined");
+        }
+        setArticles(news);
       } catch (error) {
         console.error("Error loading news:", error);
       } finally {
@@ -48,7 +55,9 @@ const HomePage = () => {
     <View style={styles.container}>
       {/* Header */}
       <Text style={styles.title}>IntellectInk</Text>
-      <Text style={styles.subtitle}>Explore bite-sized insights and stay curious.</Text>
+      <Text style={styles.subtitle}>
+        Explore bite-sized insights and stay curious.
+      </Text>
 
       {/* Reading Tracker */}
       <TouchableOpacity style={styles.tracker}>
@@ -59,23 +68,34 @@ const HomePage = () => {
       {/* Content List */}
       <FlatList
         data={articles}
-        keyExtractor={(item) => item.id?.toString() || item.url} 
+        keyExtractor={(item) => item.id?.toString() || item.url}
         renderItem={({ item }) => (
           <View style={styles.section}>
-            {/* <Text style={styles.sectionTitle}>{item.source.name}</Text> */}
             <View style={styles.articleCard}>
-              <Text style={styles.articleTitle}>{item.title}</Text>
+              <Text
+                style={styles.articleTitleLink}
+                onPress={() => Linking.openURL(item.url)}
+              >
+                {item.title}
+              </Text>
               <Text style={styles.articleExcerpt}>{item.description}</Text>
+              {item.urlToImage && (
+                <Image
+                  source={{ uri: item.urlToImage }}
+                  style={styles.articleImage}
+                />
+              )}
               <Text style={styles.articleMeta}>
-              {item.source.name} • {new Date(item.publishedAt).toDateString()}
+                {item.source.name} • {new Date(item.publishedAt).toDateString()}
               </Text>
             </View>
           </View>
         )}
+        ItemSeparatorComponent={() => <View style={styles.separator} />}
       />
       <Pressable style={styles.button} onPress={handleSignOut}>
-            <Text style={styles.buttonText}>Sign out</Text>
-          </Pressable>
+        <Text style={styles.buttonText}>Sign out</Text>
+      </Pressable>
     </View>
   );
 };
@@ -88,6 +108,24 @@ const styles = StyleSheet.create({
     backgroundColor: "black",
     paddingHorizontal: 16,
     paddingTop: 40,
+  },
+  articleTitleLink: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#2563eb", // blue-ish for link styling
+    textDecorationLine: "underline",
+    marginBottom: 4,
+  },
+  separator: {
+    height: 1,
+    backgroundColor: "#e5e7eb", // light gray
+    marginVertical: 8,
+  },
+  articleImage: {
+    width: "100%",
+    height: 150,
+    borderRadius: 8,
+    marginBottom: 8,
   },
   buttonText: {
     color: "white",
