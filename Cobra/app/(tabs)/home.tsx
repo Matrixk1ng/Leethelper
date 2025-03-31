@@ -15,15 +15,24 @@ import { signOut } from "firebase/auth";
 import { auth } from "@/firebaseConfig";
 import { fetchNews } from "@/api/newsAPI";
 import { Article } from "@/types/newstypes";
+import { useUserTopics } from "@/hooks/topicsHook";
+
 
 const HomePage = () => {
   const router = useRouter();
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const topics = useUserTopics();
+  if(topics.length === 0 ){
+    console.log("Empty topic")
+  }
   useEffect(() => {
     const loadNews = async () => {
       try {
-        const news = await fetchNews();
+        if (topics.length === 0) return;
+        console.log("topics", topics)
+        const news = await fetchNews(topics);
         if (news === undefined) {
           return new Error("Undefined");
         }
@@ -36,7 +45,7 @@ const HomePage = () => {
     };
 
     loadNews();
-  }, []);
+  }, [topics]);
   const handleSignOut = async () => {
     try {
       console.log("Signing out...");

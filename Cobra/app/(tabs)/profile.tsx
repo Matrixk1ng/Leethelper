@@ -10,9 +10,9 @@ import {
   SafeAreaView,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { auth } from "../../firebaseConfig"; // adjust the path based on your structure
+import { auth, db } from "../../firebaseConfig"; // adjust the path based on your structure
 import { User } from "firebase/auth";
-
+import { doc, getDoc, setDoc } from "firebase/firestore";
 
 const allTopics = [
   "Technology",
@@ -26,7 +26,8 @@ const allTopics = [
 const profile = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedTopics, setSelectedTopics] = useState<string[]>([]);
-  
+  const [user, setUser] = useState<User | null>(null);
+
   const toggleTopic = (topic: string) => {
     setSelectedTopics(
       (prev) =>
@@ -36,11 +37,46 @@ const profile = () => {
     );
   };
 
-  const [user, setUser] = useState<User | null>(null);
   useEffect(() => {
-    const currentUser = auth.currentUser;
-    setUser(currentUser);
+    const fetchUserData = async () => {
+      const currentUser = auth.currentUser;
+      if (!currentUser) return;
+      setUser(currentUser);
+
+      const docRef = doc(db, "users", currentUser.uid);
+      const docSnap = await getDoc(docRef);
+
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        const preferences = data.preferences || [];
+        setSelectedTopics(preferences); // Pre-select in modal too
+      } else {
+        setSelectedTopics([]);
+      }
+    };
+
+    fetchUserData();
   }, []);
+
+  const savePreferences = async (topics: string[]) => {
+    const user = auth.currentUser;
+    try {
+      if (!user) {
+        return new Error("User not found");
+      }
+
+      await setDoc(
+        doc(db, "users", user.uid),
+        {
+          preferences: topics,
+        },
+        { merge: true }
+      ); // merge keeps existing fields untouched
+    } catch (error: any) {
+      Alert.alert("Sign-in Failed", error.message);
+    }
+  };
+
   return (
     <View style={styles.container}>
       <TouchableOpacity style={styles.backButton}>
@@ -62,12 +98,15 @@ const profile = () => {
       {/* Placeholder for topics */}
       <Text style={styles.sectionTitle}>Topics of Interest</Text>
       <View style={styles.topicContainer}>
-        <View style={styles.topicChip}>
-          <Text style={styles.topicText}>Technology</Text>
-        </View>
-        <View style={styles.topicChip}>
-          <Text style={styles.topicText}>Science</Text>
-        </View>
+        {selectedTopics.length > 0 ? (
+          selectedTopics.map((topic, index) => (
+            <View key={index} style={styles.topicChip}>
+              <Text style={styles.topicText}>{topic}</Text>
+            </View>
+          ))
+        ) : (
+          <Text style={{ color: "#999" }}>No topics selected</Text>
+        )}
       </View>
 
       <TouchableOpacity
@@ -115,9 +154,11 @@ const profile = () => {
             </View>
             <Pressable
               style={[styles.button, styles.buttonClose]}
-              onPress={() => setModalVisible(!modalVisible)}
+              onPress={() => {
+                setModalVisible(!modalVisible), savePreferences(selectedTopics);
+              }}
             >
-              <Text style={styles.textStyle}>Hide Modal</Text>
+              <Text style={styles.textStyle}>Save</Text>
             </Pressable>
           </View>
         </View>
