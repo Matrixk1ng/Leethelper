@@ -20,7 +20,6 @@ export const fetchNews = async (topics: string[]): Promise<Article[]> => {
       }));
 
       allArticles = [...allArticles, ...topicArticles];
-      console.log("articles", topicArticles)
     } catch (error) {
       console.error(`Error fetching news for topic ${topic}:`, error);
     }

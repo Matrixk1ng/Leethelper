@@ -7,7 +7,6 @@ import {
   Modal,
   Alert,
   Pressable,
-  SafeAreaView,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { auth, db } from "../../firebaseConfig"; // adjust the path based on your structure
@@ -17,10 +16,16 @@ import { doc, getDoc, setDoc } from "firebase/firestore";
 const allTopics = [
   "Technology",
   "Science",
-  "History",
-  "Literature",
-  "Poetry",
   "Health",
+  "games",
+  "gaming",
+  "business",
+  "entertainment",
+  "general",
+  "health",
+  "science",
+  "sports",
+  "technology"
 ];
 
 const profile = () => {

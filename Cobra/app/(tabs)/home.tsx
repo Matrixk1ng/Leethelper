@@ -4,48 +4,19 @@ import {
   Pressable,
   View,
   TouchableOpacity,
-  FlatList,
-  ActivityIndicator,
-  Image,
-  Linking,
 } from "react-native";
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { useRouter } from "expo-router";
 import { signOut } from "firebase/auth";
 import { auth } from "@/firebaseConfig";
-import { fetchNews } from "@/api/newsAPI";
-import { Article } from "@/types/newstypes";
-import { useUserTopics } from "@/hooks/topicsHook";
 
 
 const HomePage = () => {
   const router = useRouter();
-  const [articles, setArticles] = useState<Article[]>([]);
-  const [loading, setLoading] = useState(true);
 
-  const topics = useUserTopics();
-  if(topics.length === 0 ){
-    console.log("Empty topic")
-  }
-  useEffect(() => {
-    const loadNews = async () => {
-      try {
-        if (topics.length === 0) return;
-        console.log("topics", topics)
-        const news = await fetchNews(topics);
-        if (news === undefined) {
-          return new Error("Undefined");
-        }
-        setArticles(news);
-      } catch (error) {
-        console.error("Error loading news:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
+  
 
-    loadNews();
-  }, [topics]);
+  
   const handleSignOut = async () => {
     try {
       console.log("Signing out...");
@@ -57,51 +28,34 @@ const HomePage = () => {
     }
   };
 
-  if (loading) {
-    return <ActivityIndicator size="large" color="#6d28d9" />;
-  }
+  // if (loading) {
+  //   return <ActivityIndicator size="large" color="#6d28d9" />;
+  // }
   return (
     <View style={styles.container}>
-      {/* Header */}
       <Text style={styles.title}>IntellectInk</Text>
-      <Text style={styles.subtitle}>
-        Explore bite-sized insights and stay curious.
-      </Text>
-
-      {/* Reading Tracker */}
-      <TouchableOpacity style={styles.tracker}>
-        <Text style={styles.trackerDays}>2 days</Text>
-        <Text style={styles.trackerLabel}>Reading tracker</Text>
-      </TouchableOpacity>
-
-      {/* Content List */}
-      <FlatList
-        data={articles}
-        keyExtractor={(item) => item.id?.toString() || item.url}
-        renderItem={({ item }) => (
-          <View style={styles.section}>
-            <View style={styles.articleCard}>
-              <Text
-                style={styles.articleTitleLink}
-                onPress={() => Linking.openURL(item.url)}
-              >
-                {item.title}
+              <Text style={styles.subtitle}>
+                Explore bite-sized insights and stay curious.
               </Text>
-              <Text style={styles.articleExcerpt}>{item.description}</Text>
-              {item.urlToImage && (
-                <Image
-                  source={{ uri: item.urlToImage }}
-                  style={styles.articleImage}
-                />
-              )}
-              <Text style={styles.articleMeta}>
-                {item.source.name} • {new Date(item.publishedAt).toDateString()}
-              </Text>
-            </View>
-          </View>
-        )}
-        ItemSeparatorComponent={() => <View style={styles.separator} />}
-      />
+      <View style={styles.grid}>
+
+        <TouchableOpacity style={[styles.box, styles.boxLarge]} onPress={() => router.push("/home/news")}>
+          <Text style={styles.boxText}>News</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.box} onPress={() => router.push("/home/books")}>
+          <Text style={styles.boxText}>Books</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.box} onPress={() => router.push("/home/poems")}>
+          <Text style={styles.boxText}>Poems</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.box} onPress={() => router.push("/home/research")}>
+          <Text style={styles.boxText}>Scholarly Articles</Text>
+        </TouchableOpacity>
+        
+      </View>
       <Pressable style={styles.button} onPress={handleSignOut}>
         <Text style={styles.buttonText}>Sign out</Text>
       </Pressable>
@@ -114,27 +68,8 @@ export default HomePage;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "black",
-    paddingHorizontal: 16,
-    paddingTop: 40,
-  },
-  articleTitleLink: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "#2563eb", // blue-ish for link styling
-    textDecorationLine: "underline",
-    marginBottom: 4,
-  },
-  separator: {
-    height: 1,
-    backgroundColor: "#e5e7eb", // light gray
-    marginVertical: 8,
-  },
-  articleImage: {
-    width: "100%",
-    height: 150,
-    borderRadius: 8,
-    marginBottom: 8,
+    backgroundColor: 'black',
+    padding: 16,
   },
   buttonText: {
     color: "white",
@@ -158,49 +93,34 @@ const styles = StyleSheet.create({
     color: "#6b7280",
     marginBottom: 16,
   },
-  tracker: {
-    backgroundColor: "#6d28d9",
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 12,
+  header: {
+    fontSize: 28,
+    fontWeight: 'bold',
     marginBottom: 20,
+    textAlign: 'center',
   },
-  trackerDays: {
-    color: "#fff",
+  grid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+  },
+  box: {
+    backgroundColor: '#6d28d9',
+    width: '48%',
+    height: 150,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  boxLarge: {
+    width: '100%',
+    height: 200,
+  },
+  boxText: {
+    color: '#fff',
     fontSize: 18,
-    fontWeight: "bold",
-  },
-  trackerLabel: {
-    color: "#fff",
-    fontSize: 12,
-  },
-  section: {
-    marginBottom: 16,
-  },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "white",
-    marginBottom: 8,
-  },
-  articleCard: {
-    backgroundColor: "black",
-    padding: 12,
-    borderRadius: 8,
-  },
-  articleTitle: {
-    fontSize: 14,
-    fontWeight: "bold",
-    color: "white",
-  },
-  articleExcerpt: {
-    fontSize: 12,
-    color: "white",
-    marginTop: 4,
-  },
-  articleMeta: {
-    fontSize: 10,
-    color: "#9ca3af",
-    marginTop: 6,
+    fontWeight: 'bold',
   },
 });
+
