@@ -13,7 +13,7 @@ import {
 import React from "react";
 import { useNews } from "@/context/newsContext";
 import { useRouter } from "expo-router";
-const HomePage = () => {
+const news = () => {
   // I use context so I am not making api calls everytime I click the news grid
   const { articles, loading, reloadNews } = useNews();
   const router = useRouter();
@@ -86,7 +86,7 @@ const HomePage = () => {
   );
 };
 
-export default HomePage;
+export default news;
 
 const styles = StyleSheet.create({
   container: {
