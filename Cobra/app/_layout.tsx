@@ -1,6 +1,5 @@
 import { Stack } from "expo-router";
 import { NewsProvider } from "@/context/newsContext";
-
 export default function RootLayout() {
   return (
     <NewsProvider>

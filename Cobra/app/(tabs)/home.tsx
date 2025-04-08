@@ -4,12 +4,13 @@ import {
   Pressable,
   View,
   TouchableOpacity,
+  ScrollView,
 } from "react-native";
 import React from "react";
 import { useRouter } from "expo-router";
 import { signOut } from "firebase/auth";
 import { auth } from "@/firebaseConfig";
-
+import {StatusBar} from 'expo-status-bar'
 
 const HomePage = () => {
   const router = useRouter();
@@ -32,11 +33,20 @@ const HomePage = () => {
   //   return <ActivityIndicator size="large" color="#6d28d9" />;
   // }
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container}>
+      <StatusBar style="light" />
+
+      {/* Header */}
       <Text style={styles.title}>IntellectInk</Text>
-              <Text style={styles.subtitle}>
-                Explore bite-sized insights and stay curious.
-              </Text>
+      <Text style={styles.subtitle}>Explore bite-sized insights and stay curious.</Text>
+
+      {/* Reading Tracker */}
+      <TouchableOpacity style={styles.tracker} onPress={() => console.log("tracker clicked")}>
+        <Text style={styles.trackerDays}>2 days</Text>
+        <Text style={styles.trackerLabel}>Reading tracker</Text>
+      </TouchableOpacity>
+
+      {/* Category Grid */}
       <View style={styles.grid}>
 
         <TouchableOpacity style={[styles.box, styles.boxLarge]} onPress={() => router.push("/home/news")}>
@@ -54,12 +64,9 @@ const HomePage = () => {
         <TouchableOpacity style={styles.box} onPress={() => router.push("/home/research")}>
           <Text style={styles.boxText}>Scholarly Articles</Text>
         </TouchableOpacity>
-        
+
       </View>
-      <Pressable style={styles.button} onPress={handleSignOut}>
-        <Text style={styles.buttonText}>Sign out</Text>
-      </Pressable>
-    </View>
+    </ScrollView>
   );
 };
 
@@ -68,59 +75,57 @@ export default HomePage;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'black',
+    backgroundColor: '#000',
     padding: 16,
   },
-  buttonText: {
-    color: "white",
-    fontSize: 20,
-    fontWeight: "bold",
-    textAlign: "center",
-    padding: 4,
-  },
-  button: {
-    height: 60,
-    borderRadius: 20,
-    padding: 6,
-  },
   title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: "white",
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#fff',
   },
   subtitle: {
     fontSize: 14,
-    color: "#6b7280",
+    color: '#9ca3af',
     marginBottom: 16,
   },
-  header: {
-    fontSize: 28,
-    fontWeight: 'bold',
+  tracker: {
+    backgroundColor: "#6d28d9",
+    padding: 12,
+    borderRadius: 12,
     marginBottom: 20,
-    textAlign: 'center',
+  },
+  trackerDays: {
+    color: "#fff",
+    fontSize: 20,
+    fontWeight: "bold",
+  },
+  trackerLabel: {
+    color: "#fff",
+    fontSize: 12,
   },
   grid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
   },
   box: {
-    backgroundColor: '#6d28d9',
-    width: '48%',
-    height: 150,
+    backgroundColor: "#111",
     borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
+    padding: 12,
+    width: "48%",
+    height: 100,
     marginBottom: 12,
+    justifyContent: "center",
+    alignItems: "center",
   },
   boxLarge: {
-    width: '100%',
-    height: 200,
+    width: "100%",
+    height: 140,
   },
   boxText: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: 'bold',
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
+    textAlign: "center",
   },
 });
-
