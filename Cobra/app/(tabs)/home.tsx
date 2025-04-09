@@ -25,6 +25,7 @@ interface TopicArticle {
 }
 const HomePage = () => {
   const router = useRouter();
+
   const { topics } = useUserTopics();
   const { articles } = useNews();
 
@@ -54,7 +55,7 @@ const HomePage = () => {
     <ScrollView style={styles.container}>
       <StatusBar style="light" />
 
-      {/* Header */}
+      {/* Header */}    
       <View style={styles.headerContainer}>
         <Text style={styles.appTitle}>IntellectInk</Text>
         <Text style={styles.subtitle}>
@@ -149,6 +150,11 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#ffffff",
     padding: 16,
+    paddingTop: 50,
+  },
+  slider: {
+    marginTop: 10,
+    paddingVertical: 4,
   },
   headerContainer: {
     marginTop: 20,

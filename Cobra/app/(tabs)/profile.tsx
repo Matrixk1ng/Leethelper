@@ -8,9 +8,10 @@ import {
   Alert,
   Pressable,
 } from "react-native";
+import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { auth, db } from "../../firebaseConfig"; // adjust the path based on your structure
-import { User } from "firebase/auth";
+import { User, signOut } from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 
 const allTopics = [
@@ -28,6 +29,18 @@ const profile = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedTopics, setSelectedTopics] = useState<string[]>([]);
   const [user, setUser] = useState<User | null>(null);
+  const router = useRouter();
+
+    const handleSignOut = async () => {
+      try {
+        console.log("Signing out...");
+        await signOut(auth);
+        console.log("Signed out");
+        router.replace("/");
+      } catch (error) {
+        console.error("Sign-out error:", error);
+      }
+    };
 
   const toggleTopic = (topic: string) => {
     setSelectedTopics(
@@ -164,6 +177,9 @@ const profile = () => {
           </View>
         </View>
       </Modal>
+      <Pressable style={styles.button} onPress={handleSignOut}>
+        <Text>Sign out</Text>
+      </Pressable>
     </View>
   );
 };
