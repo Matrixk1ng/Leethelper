@@ -16,14 +16,14 @@ const registration = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState(""); // Fix here
 
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const signUp = async () => {
     try {
       console.log("Sign-up attempt with:", email);
-
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       console.log("Registered:", userCredential.user.email);
+      setLoading(false)
       router.push("/(tabs)/home");
     } catch (error : any) {
       console.error("Sign-up error:", error.code, error.message);
