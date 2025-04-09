@@ -18,15 +18,11 @@ const allTopics = [
   "Technology",
   "Science",
   "Health",
-  "games",
-  "gaming",
-  "business",
-  "entertainment",
-  "general",
-  "health",
-  "science",
-  "sports",
-  "technology"
+  "Gaming",
+  "Business",
+  "Entertainment",
+  "General",
+  "Sports",
 ];
 
 const profile = () => {

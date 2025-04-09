@@ -4,6 +4,7 @@ export type Article = {
       id: string | null;
       name: string;
     };
+    topic: string;
     author?: string;
     title: string;
     description: string;

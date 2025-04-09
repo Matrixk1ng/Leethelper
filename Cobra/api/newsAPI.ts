@@ -1,6 +1,18 @@
 import { Article } from "@/types/newstypes";
 
 const NEWSAPIKEY = process.env.EXPO_PUBLIC_NEWSAPI_KEY;
+const groupArticlesByTopic = (articles: Article[], topics: string[]) => {
+  const grouped: Record<string, Article[]> = {};
+
+  for (const topic of topics) {
+    grouped[topic] = articles.filter((article) =>
+      article.title.toLowerCase().includes(topic.toLowerCase()) ||
+      article.description?.toLowerCase().includes(topic.toLowerCase())
+    );
+  }
+
+  return grouped;
+};
 
 export const fetchNews = async (topics: string[]): Promise<Article[]> => {
   let allArticles: Article[] = [];
@@ -17,6 +29,7 @@ export const fetchNews = async (topics: string[]): Promise<Article[]> => {
       const topicArticles = data.articles.map((article: Article, index: number) => ({
         ...article,
         id: `${topic}-${index}`, // unique ID
+        topic: topic,
       }));
 
       allArticles = [...allArticles, ...topicArticles];
@@ -24,6 +37,6 @@ export const fetchNews = async (topics: string[]): Promise<Article[]> => {
       console.error(`Error fetching news for topic ${topic}:`, error);
     }
   }
-  //console.log("all articels", allArticles)
+  console.log("all articels", allArticles)
   return allArticles;
 };

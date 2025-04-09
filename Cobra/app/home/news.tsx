@@ -12,14 +12,18 @@ import {
 } from "react-native";
 import React from "react";
 import { useNews } from "@/context/newsContext";
-import { useRouter } from "expo-router";
+import { useRouter, useLocalSearchParams } from "expo-router";
 const news = () => {
   // I use context so I am not making api calls everytime I click the news grid
   const { articles, loading, reloadNews } = useNews();
   const router = useRouter();
+  const { topic } = useLocalSearchParams<{ topic: string }>();
 
   if (loading) return <ActivityIndicator size="large" color="#6d28d9" />;
   if (articles.length === 0) return <Text>No news available.</Text>;
+  const filteredArticles = topic
+    ? articles.filter((a) => a.topic?.toLowerCase() === topic.toLowerCase())
+    : articles;
 
   function goBack() {
     router.replace("/home");
@@ -31,23 +35,15 @@ const news = () => {
       <Pressable style={styles.button} onPress={goBack}>
         <Text style={styles.buttonText}>Go Back</Text>
       </Pressable>
-      <Text style={styles.title}>IntellectInk</Text>
-      <Text style={styles.subtitle}>
-        Explore bite-sized insights and stay curious.
-      </Text>
+      
 
-      {/* Reading Tracker */}
-      <TouchableOpacity style={styles.tracker}>
-        <Text style={styles.trackerDays}>2 days</Text>
-        <Text style={styles.trackerLabel}>Reading tracker</Text>
-      </TouchableOpacity>
 
       {/* Content List */}
       {loading && articles.length === 0 ? (
         <ActivityIndicator size="large" color="#6d28d9" />
       ) : (
         <FlatList
-          data={articles}
+          data={filteredArticles}
           keyExtractor={(item) => item.id?.toString() || item.url}
           refreshControl={
             <RefreshControl
@@ -91,7 +87,7 @@ export default news;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "black",
+    backgroundColor: "#fffff",
     paddingHorizontal: 16,
     paddingTop: 40,
   },
@@ -104,17 +100,17 @@ const styles = StyleSheet.create({
   },
   separator: {
     height: 1,
-    backgroundColor: "#e5e7eb", // light gray
+    backgroundColor: "black", // light gray
     marginVertical: 8,
   },
   articleImage: {
     width: "100%",
-    height: 150,
+    height: 200,
     borderRadius: 8,
     marginBottom: 8,
   },
   buttonText: {
-    color: "white",
+    color: "black",
     fontSize: 20,
     fontWeight: "bold",
     textAlign: "center",
@@ -135,33 +131,18 @@ const styles = StyleSheet.create({
     color: "#6b7280",
     marginBottom: 16,
   },
-  tracker: {
-    backgroundColor: "#6d28d9",
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 12,
-    marginBottom: 20,
-  },
-  trackerDays: {
-    color: "#fff",
-    fontSize: 18,
-    fontWeight: "bold",
-  },
-  trackerLabel: {
-    color: "#fff",
-    fontSize: 12,
-  },
   section: {
     marginBottom: 16,
+
   },
   sectionTitle: {
     fontSize: 16,
     fontWeight: "bold",
-    color: "white",
+    color: "black",
     marginBottom: 8,
   },
   articleCard: {
-    backgroundColor: "black",
+    backgroundColor: "white",
     padding: 12,
     borderRadius: 8,
   },
