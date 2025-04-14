@@ -9,8 +9,6 @@ import {
 } from "react-native";
 import React from "react";
 import { useRouter } from "expo-router";
-import { signOut } from "firebase/auth";
-import { auth } from "@/firebaseConfig";
 import { StatusBar } from "expo-status-bar";
 import { useNews } from "@/context/newsContext";
 import { useUserTopics } from "@/hooks/topicsHook";
@@ -37,23 +35,12 @@ const HomePage = () => {
     })
     .filter((item): item is TopicArticle => item !== null); // ✅ This is the magic line
 
-  const handleSignOut = async () => {
-    try {
-      console.log("Signing out...");
-      await signOut(auth);
-      console.log("Signed out");
-      router.replace("/");
-    } catch (error) {
-      console.error("Sign-out error:", error);
-    }
-  };
-
   // if (loading) {
   //   return <ActivityIndicator size="large" color="#6d28d9" />;
   // }
   return (
     <ScrollView style={styles.container}>
-      <StatusBar style="light" />
+      <StatusBar style="dark" />
 
       {/* Header */}    
       <View style={styles.headerContainer}>
@@ -75,7 +62,6 @@ const HomePage = () => {
       {/* Category Grid */}
 
       <View style={styles.categoryContainer}>
-        <Text style={styles.boxText}>News</Text>
         {/* News scrollView */}
         <ScrollView
           horizontal
@@ -118,26 +104,32 @@ const HomePage = () => {
           ))}
         </ScrollView>
 
-        <TouchableOpacity
-          style={styles.box}
+        <Pressable
+          style={styles.card}
+          delayLongPress={30}
           onPress={() => router.push("/home/books")}
         >
-          <Text style={styles.boxText}>Books</Text>
-        </TouchableOpacity>
+          <Text style={styles.cardTitle}>Books</Text>
+          <Text>Lots of books</Text>
+        </Pressable>
 
-        <TouchableOpacity
-          style={styles.box}
+        <Pressable
+          style={styles.card}
+          delayLongPress={30}
           onPress={() => router.push("/home/poems")}
         >
-          <Text style={styles.boxText}>Poems</Text>
-        </TouchableOpacity>
+          <Text style={styles.cardTitle}>Poems</Text>
+          <Text>Lots of Poems</Text>
+        </Pressable>
 
-        <TouchableOpacity
-          style={styles.box}
+        <Pressable
+          style={styles.card}
+          delayLongPress={30}
           onPress={() => router.push("/home/research")}
         >
-          <Text style={styles.boxText}>Scholarly Articles</Text>
-        </TouchableOpacity>
+          <Text style={styles.cardTitle}>Research</Text>
+          <Text>Lots of books</Text>
+        </Pressable>
       </View>
     </ScrollView>
   );
@@ -150,7 +142,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#ffffff",
     padding: 16,
-    paddingTop: 50,
+    paddingTop: 20,
   },
   slider: {
     marginTop: 10,
@@ -172,18 +164,18 @@ const styles = StyleSheet.create({
   readingTrackerContainer: {
     marginTop: 16,
     borderRadius: 8,
-    backgroundColor: "#EBF2FF",
+    backgroundColor: "#6d28d9",
     paddingVertical: 20,
     paddingHorizontal: 16,
   },
   trackerText: {
     fontSize: 24,
     fontWeight: "600",
-    color: "#1B4DE4",
+    color: "white",
   },
   trackerSubText: {
     fontSize: 14,
-    color: "#1B4DE4",
+    color: "white",
     marginTop: 4,
   },
   grid: {

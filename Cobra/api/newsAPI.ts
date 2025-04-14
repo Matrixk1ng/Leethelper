@@ -37,6 +37,6 @@ export const fetchNews = async (topics: string[]): Promise<Article[]> => {
       console.error(`Error fetching news for topic ${topic}:`, error);
     }
   }
-  console.log("all articels", allArticles)
+  //console.log("all articels", allArticles)
   return allArticles;
 };

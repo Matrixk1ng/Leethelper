@@ -110,7 +110,7 @@ const profile = () => {
       )}
 
       {/* Placeholder for topics */}
-      <Text style={styles.sectionTitle}>Topics of Interest</Text>
+      <Text style={styles.sectionTitle}>News Topics</Text>
       <View style={styles.topicContainer}>
         {selectedTopics.length > 0 ? (
           selectedTopics.map((topic, index) => (
