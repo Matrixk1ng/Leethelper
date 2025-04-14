@@ -1,44 +1,60 @@
+import { auth, db } from "@/firebaseConfig";
+import { Article } from "@/types/newstypes";
+import FontAwesome from "@expo/vector-icons/FontAwesome";
+import { User } from "firebase/auth";
+import { doc, getDoc, setDoc } from "firebase/firestore";
+import React from "react";
+import { useEffect, useState } from "react";
 import {
   Text,
   StyleSheet,
-  View,
+  ScrollView,
   FlatList,
-  ActivityIndicator,
   Image,
-  Linking,
+  View,
   Pressable,
-  RefreshControl,
+  Linking,
   Alert,
 } from "react-native";
-import React, { useEffect, useState } from "react";
-import { useNews } from "@/context/newsContext";
-import { useRouter, useLocalSearchParams } from "expo-router";
-import FontAwesome from "@expo/vector-icons/FontAwesome";
-import { Article } from "@/types/newstypes";
-import { auth, db } from "@/firebaseConfig";
-import { User } from "firebase/auth";
-import { doc, getDoc, setDoc } from "firebase/firestore";
 
-
-const news = () => {
-  // I use context so I am not making api calls everytime I click the news grid
-  const [savedNews, setSavedNews] = useState<Article[]>([]);
+const saved = () => {
   const [user, setUser] = useState<User | null>(null);
-  
-  const { articles, loading, reloadNews } = useNews();
-  const router = useRouter();
-  const { topic } = useLocalSearchParams<{ topic: string }>();
+  const [savedNews, setSavedNews] = useState<Article[]>([]);
+  const [loading, setloading] = useState(true);
 
   function toggleArticleSave(article: Article) {
     const isSaved = hasSavedArticle(article.url);
     if (isSaved) {
       setSavedNews((prev) => prev.filter((a) => a.url !== article.url));
-      console.log(savedNews)
+      console.log(savedNews);
     } else {
       setSavedNews((prev) => [...prev, article]);
-      console.log(savedNews)
+      console.log(savedNews);
     }
   }
+
+  function hasSavedArticle(url: string) {
+    return savedNews.some((a) => a.url === url);
+  }
+  // this use effect saves to fireStore recalls everytime a new bookmark is made
+  useEffect(() => {
+    const user = auth.currentUser;
+    if (!user) return;
+    const saveToFirestore = async () => {
+      try {
+        await setDoc(
+          doc(db, "users", user.uid),
+          { SavedNews: savedNews },
+          { merge: true }
+        );
+      } catch (error: any) {
+        Alert.alert("Failed to save", error.message);
+      }
+    };
+    saveToFirestore();
+  }, [savedNews]);
+
+  // this useeffect fetchesdata from fireStore
   useEffect(() => {
     const fetchUserData = async () => {
       const currentUser = auth.currentUser;
@@ -58,56 +74,17 @@ const news = () => {
     };
 
     fetchUserData();
+    setloading(false);
   }, []);
 
-  useEffect(() => {
-    const user = auth.currentUser;
-    if (!user) return;
-    const saveToFirestore = async () => {
-      try {
-        await setDoc(doc(db, "users", user.uid), { SavedNews: savedNews }, { merge: true });
-      } catch (error: any) {
-        Alert.alert("Failed to save", error.message);
-      }
-    };
-    saveToFirestore();
-  }, [savedNews]);
-  
-
-  if (loading) return <ActivityIndicator size="large" color="#6d28d9" />;
-  if (articles.length === 0) return <Text>No news available.</Text>;
-  const filteredArticles = topic
-    ? articles.filter((a) => a.topic?.toLowerCase() === topic.toLowerCase())
-    : articles;
-
-  function goBack() {
-    router.replace("/home");
-  }
-  function hasSavedArticle(url: string) {
-    return savedNews.some((a) => a.url === url);
-  }
-
   return (
-    <View style={styles.container}>
-      {/* Header */}
-      <Pressable style={styles.button} onPress={goBack}>
-        <Text style={styles.buttonText}>Go Back</Text>
-      </Pressable>
-
-      {/* Content List */}
-      {loading && articles.length === 0 ? (
-        <ActivityIndicator size="large" color="#6d28d9" />
+    <ScrollView style={styles.container}>
+      {savedNews.length === 0 ? (
+        <Text style={{color: "black"}}>Bomboclat</Text>
       ) : (
         <FlatList
-          data={filteredArticles}
+          data={savedNews}
           keyExtractor={(item) => item.id?.toString() || item.url}
-          refreshControl={
-            <RefreshControl
-              refreshing={loading}
-              onRefresh={reloadNews}
-              colors={["#6d28d9"]}
-            />
-          }
           renderItem={({ item }) => (
             <View style={styles.section}>
               <View style={styles.articleCard}>
@@ -151,11 +128,11 @@ const news = () => {
           ItemSeparatorComponent={() => <View style={styles.separator} />}
         />
       )}
-    </View>
+    </ScrollView>
   );
 };
 
-export default news;
+export default saved;
 
 const styles = StyleSheet.create({
   container: {

@@ -10,16 +10,25 @@ export default function TabsLayout() {
         name="home"
         options={{
           title: "home",
-          tabBarIcon: ({ color }) => (
+          tabBarIcon: ({ color } : {color: string}) => (
             <FontAwesome size={28} name="home" color={color} />
           ),
         }}
       />
       <Tabs.Screen
+        name="saved"
+        options={{
+          title: "saved",
+          tabBarIcon: ({ color } : {color: string}) => (
+            <FontAwesome size={28} name="bookmark" color={color} />
+          ),
+        }}
+      ></Tabs.Screen>
+      <Tabs.Screen
         name="profile"
         options={{
           title: "profile",
-          tabBarIcon: ({ color }) => (
+          tabBarIcon: ({ color } : {color: string}) => (
             <FontAwesome size={28} name="user" color={color} />
           ),
         }}
