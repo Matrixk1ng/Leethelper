@@ -18,60 +18,25 @@ import { Article } from "@/types/newstypes";
 import { auth, db } from "@/firebaseConfig";
 import { User } from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore";
+import { useSavedNews } from "@/context/SavedNewsContext";
 
 
 const news = () => {
   // I use context so I am not making api calls everytime I click the news grid
-  const [savedNews, setSavedNews] = useState<Article[]>([]);
   const [user, setUser] = useState<User | null>(null);
-  
+  const { savedNews, toggleArticleSave, hasSavedArticle } = useSavedNews();
+
   const { articles, loading, reloadNews } = useNews();
   const router = useRouter();
   const { topic } = useLocalSearchParams<{ topic: string }>();
 
-  function toggleArticleSave(article: Article) {
-    const isSaved = hasSavedArticle(article.url);
-    if (isSaved) {
-      setSavedNews((prev) => prev.filter((a) => a.url !== article.url));
-      console.log(savedNews)
-    } else {
-      setSavedNews((prev) => [...prev, article]);
-      console.log(savedNews)
-    }
-  }
-  useEffect(() => {
-    const fetchUserData = async () => {
-      const currentUser = auth.currentUser;
-      if (!currentUser) return;
-      setUser(currentUser);
+ 
 
-      const docRef = doc(db, "users", currentUser.uid);
-      const docSnap = await getDoc(docRef);
+  
 
-      if (docSnap.exists()) {
-        const data = docSnap.data();
-        const saved = data.SavedNews || [];
-        setSavedNews(saved); // Pre-select in modal too
-      } else {
-        setSavedNews([]);
-      }
-    };
 
-    fetchUserData();
-  }, []);
 
-  useEffect(() => {
-    const user = auth.currentUser;
-    if (!user) return;
-    const saveToFirestore = async () => {
-      try {
-        await setDoc(doc(db, "users", user.uid), { SavedNews: savedNews }, { merge: true });
-      } catch (error: any) {
-        Alert.alert("Failed to save", error.message);
-      }
-    };
-    saveToFirestore();
-  }, [savedNews]);
+  
   
 
   if (loading) return <ActivityIndicator size="large" color="#6d28d9" />;
@@ -81,10 +46,7 @@ const news = () => {
     : articles;
 
   function goBack() {
-    router.replace("/home");
-  }
-  function hasSavedArticle(url: string) {
-    return savedNews.some((a) => a.url === url);
+    router.push("/home");
   }
 
   return (
