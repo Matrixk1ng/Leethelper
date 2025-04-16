@@ -2,22 +2,42 @@ import {
   Text,
   StyleSheet,
   View,
-  TouchableOpacity,
   FlatList,
   ActivityIndicator,
   Image,
   Linking,
   Pressable,
   RefreshControl,
+  Alert,
 } from "react-native";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useNews } from "@/context/newsContext";
 import { useRouter, useLocalSearchParams } from "expo-router";
+import FontAwesome from "@expo/vector-icons/FontAwesome";
+import { Article } from "@/types/newstypes";
+import { auth, db } from "@/firebaseConfig";
+import { User } from "firebase/auth";
+import { doc, getDoc, setDoc } from "firebase/firestore";
+import { useSavedNews } from "@/context/SavedNewsContext";
+
+
 const news = () => {
   // I use context so I am not making api calls everytime I click the news grid
+  const [user, setUser] = useState<User | null>(null);
+  const { savedNews, toggleArticleSave, hasSavedArticle } = useSavedNews();
+
   const { articles, loading, reloadNews } = useNews();
   const router = useRouter();
   const { topic } = useLocalSearchParams<{ topic: string }>();
+
+ 
+
+  
+
+
+
+  
+  
 
   if (loading) return <ActivityIndicator size="large" color="#6d28d9" />;
   if (articles.length === 0) return <Text>No news available.</Text>;
@@ -26,7 +46,7 @@ const news = () => {
     : articles;
 
   function goBack() {
-    router.replace("/home");
+    router.push("/home");
   }
 
   return (
@@ -35,8 +55,6 @@ const news = () => {
       <Pressable style={styles.button} onPress={goBack}>
         <Text style={styles.buttonText}>Go Back</Text>
       </Pressable>
-      
-
 
       {/* Content List */}
       {loading && articles.length === 0 ? (
@@ -68,10 +86,27 @@ const news = () => {
                     style={styles.articleImage}
                   />
                 )}
-                <Text style={styles.articleMeta}>
-                  {item.source.name} •{" "}
-                  {new Date(item.publishedAt).toDateString()}
-                </Text>
+                <View style={styles.metaRow}>
+                  <Text style={styles.articleMeta}>
+                    {item.source.name} •{" "}
+                    {new Date(item.publishedAt).toDateString()}
+                  </Text>
+                  <Pressable
+                    onPress={() => {
+                      toggleArticleSave(item);
+                    }}
+                  >
+                    {hasSavedArticle(item.url) ? (
+                      <FontAwesome name="bookmark" size={16} color="#9ca3af" />
+                    ) : (
+                      <FontAwesome
+                        name="bookmark-o"
+                        size={16}
+                        color="#9ca3af"
+                      />
+                    )}
+                  </Pressable>
+                </View>
               </View>
             </View>
           )}
@@ -87,7 +122,7 @@ export default news;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fffff",
+    backgroundColor: "#ffffff",
     paddingHorizontal: 16,
     paddingTop: 40,
   },
@@ -133,7 +168,6 @@ const styles = StyleSheet.create({
   },
   section: {
     marginBottom: 16,
-
   },
   sectionTitle: {
     fontSize: 16,
@@ -160,6 +194,16 @@ const styles = StyleSheet.create({
   articleMeta: {
     fontSize: 10,
     color: "#9ca3af",
+    marginTop: 6,
+    flex: 1,
+  },
+  bookmark: {
+    alignItems: "flex-end",
+  },
+  metaRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginTop: 6,
   },
 });

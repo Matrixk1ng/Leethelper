@@ -76,7 +76,7 @@ const HomePage = () => {
               key={index}
               style={[styles.card, { width: screenWidth * 0.9 }]} // Take up 90% of screen
               onPress={() =>
-                router.push(`/home/news?topic=${encodeURIComponent(topic)}`)
+                router.push(`/news?topic=${encodeURIComponent(topic)}`)
               }
             >
               <Text style={styles.cardTitle}>{topic}</Text>
